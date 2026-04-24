@@ -181,7 +181,7 @@ void setup() {
   tft.begin();
   tft.setRotation(3);
 
-  uint16_t calData[5] = { 419, 3453, 344, 3399, 1 };
+  uint16_t calData[5] = { 419, 3453, 344, 3399, 1 }; // Change with yours
   tft.setTouch(calData);
 
   spiSD.begin(SD_SCK, SD_MISO, SD_MOSI, SD_CS);
