@@ -3,8 +3,8 @@
 #include <SD.h>
 #include <AnimatedGIF.h>
 
-#define SD_CS 5
-#define SD_MOSI 3
+#define SD_CS 16
+#define SD_MOSI 17
 #define SD_MISO 18
 #define SD_SCK 8
 
@@ -23,6 +23,10 @@ int menuOffset = 0;
 bool autoMode = true;
 bool forceNext = false;
 
+int frame_min_x = DW, frame_min_y = DH;
+int frame_max_x = 0, frame_max_y = 0;
+bool frame_drawn = false;
+
 enum State { MENU,
              PLAYING };
 State currentState = PLAYING;
@@ -39,8 +43,21 @@ void GIFDraw(GIFDRAW *pDraw) {
 
   if (y >= DH || pDraw->iX >= DW || iWidth < 1) return;
 
+  if (pDraw->iX < frame_min_x) frame_min_x = pDraw->iX;
+  if (pDraw->iX + iWidth > frame_max_x) frame_max_x = pDraw->iX + iWidth;
+  if (y < frame_min_y) frame_min_y = y;
+  if (y > frame_max_y) frame_max_y = y;
+  frame_drawn = true;
+
   s = pDraw->pPixels;
   d = &canvas[y * DW + pDraw->iX];
+
+  if (pDraw->ucDisposalMethod == 2) {
+    for (x = 0; x < iWidth; x++) {
+      if (s[x] == pDraw->ucTransparent) s[x] = pDraw->ucBackground;
+    }
+    pDraw->ucHasTransparency = 0;
+  }
 
   if (pDraw->ucHasTransparency) {
     uint8_t ucTransparent = pDraw->ucTransparent;
@@ -78,12 +95,8 @@ void GIFCloseFile(void *pHandle) {
 int32_t GIFReadFile(GIFFILE *pFile, uint8_t *pBuf, int32_t iLen) {
   int32_t iBytesRead = iLen;
   File *f = static_cast<File *>(pFile->fHandle);
-
-  if ((pFile->iSize - pFile->iPos) < iLen) {
-    iBytesRead = pFile->iSize - pFile->iPos;
-  }
+  if ((pFile->iSize - pFile->iPos) < iLen) iBytesRead = pFile->iSize - pFile->iPos;
   if (iBytesRead <= 0) return 0;
-
   iBytesRead = (int32_t)f->read(pBuf, iBytesRead);
   pFile->iPos = f->position();
   return iBytesRead;
@@ -180,10 +193,11 @@ void setup() {
 
   tft.begin();
   tft.setRotation(3);
-
-  uint16_t calData[5] = { 419, 3453, 344, 3399, 1 }; // Change with yours
+  tft.fillScreen(TFT_BLACK);
+  delay(100);
+  uint16_t calData[5] = { 419, 3453, 344, 3399, 1 };
   tft.setTouch(calData);
-
+  delay(100);
   spiSD.begin(SD_SCK, SD_MISO, SD_MOSI, SD_CS);
   if (!SD.begin(SD_CS, spiSD)) {
     tft.println("SD Error");
@@ -200,6 +214,7 @@ void setup() {
     entry.close();
   }
   root.close();
+
   gif.begin(LITTLE_ENDIAN_PIXELS);
 }
 
@@ -207,10 +222,37 @@ void loop() {
   if (currentState == PLAYING) {
     if (fileCount > 0) {
       forceNext = false;
+
       if (gif.open(gifFiles[currentIndex].c_str(), GIFOpenFile, GIFCloseFile, GIFReadFile, GIFSeekFile, GIFDraw)) {
 
+        tft.fillScreen(TFT_BLACK);
+        frame_min_x = DW;
+        frame_max_x = 0;
+        frame_min_y = DH;
+        frame_max_y = 0;
+        frame_drawn = false;
+
         while (gif.playFrame(true, NULL)) {
-          tft.pushImage(0, 0, DW, DH, canvas);
+
+          if (frame_drawn) {
+            int w = frame_max_x - frame_min_x;
+            int h = frame_max_y - frame_min_y + 1;
+
+            tft.startWrite();
+            tft.setWindow(frame_min_x, frame_min_y, frame_max_x - 1, frame_max_y);
+
+            for (int y = frame_min_y; y <= frame_max_y; y++) {
+              tft.pushPixels(&canvas[y * DW + frame_min_x], w);
+            }
+            tft.endWrite();
+
+            frame_min_x = DW;
+            frame_max_x = 0;
+            frame_min_y = DH;
+            frame_max_y = 0;
+            frame_drawn = false;
+          }
+
           handleTouch();
           if (forceNext || currentState != PLAYING) break;
         }
