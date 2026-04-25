@@ -44,10 +44,10 @@ Build your own following the step-by-step guide!
 ### 2. SD Card Module (SPI)
 | SD Module Pin | ESP32-S3 GPIO | Function |
 | :--- | :--- | :--- |
-| CS | GPIO **[16]** | Chip Select |
-| MOSI | GPIO **[17]** | Shared with Display |
-| CLK | GPIO **[8]** | Shared with Display |
-| MISO | GPIO **[18]** | SPI MISO |
+| SD_CS | GPIO **[16]** | Chip Select |
+| SD_MOSI | GPIO **[17]** | SPI MOSI |
+| SD_CLK | GPIO **[8]** | SPI SCLK |
+| SD_MISO | GPIO **[18]** | SPI MISO |
 
 ## 💻 Software Setup
 
