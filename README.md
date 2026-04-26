@@ -96,4 +96,21 @@ Once the device boots up, use the touch screen to control playback:
 * **White Screen on Boot:** This usually indicates a communication failure with the display. Double-check your wiring connections, ensure your `User_Setup.h` pin definitions are strictly correct, and verify that your selected PsRam enabled.
 
 ---
-*If you liked this project, don't forget to ⭐ this repository and subscribe to the YouTube channel for more ESP32 builds!*
+## 🤝 Support
+
+If you found this project helpful, please consider:
+* **Subscribing** to the YouTube Channel.
+* Giving the video a **Like**.
+* Starring this GitHub Repository!
+
+* **YouTube:** https://www.youtube.com/@DsnIndustries/videos
+* **Patreon:** https://www.patreon.com/c/dsnIndustries
+
+Happy Making!
+
+## Games
+* **Maze Escape:** https://play.google.com/store/apps/details?id=com.DsnMechanics.MazeEscape
+* **Air Hockey:** https://play.google.com/store/apps/details?id=com.DsnMechanics.AirHockey
+* **Click Challenge:** https://play.google.com/store/apps/details?id=com.DsNMechanics.ClickChallenge
+* **Flying Triangels:** https://play.google.com/store/apps/details?id=com.DsnMechanics.Triangle
+* **SkyScrapper:** https://play.google.com/store/apps/details?id=com.DsnMechanics.SkyScraper
